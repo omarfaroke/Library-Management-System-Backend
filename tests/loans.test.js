@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 
 
-let testUser, testBook, token;
+let testUser, testBook, testBook2, token;
 
 beforeAll(async () => {
 
@@ -32,6 +32,15 @@ beforeAll(async () => {
   });
   await book.save();
   testBook = book;
+
+  const book2 = new Book({
+    title: 'Test Book 2',
+    author: 'Test Author 2',
+    year: 2024,
+    isbn: '978-987654321-0'
+  });
+  await book2.save();
+  testBook2 = book2;
 
   // Get a JWT token for the test user
   const res = await request(app)
@@ -157,4 +166,63 @@ describe('Loans API (Authenticated)', () => {
     expect(deletedLoan).toBeNull();
   });
 
+});
+
+
+// GET /api/loans - Filtering and Pagination 
+describe('GET /api/loans - Filtering and Pagination', () => {
+  beforeEach(async () => {
+    // Create some loans for testing pagination and filtering
+    const loans = [
+      { user: testUser._id, book: testBook._id, borrowDate: new Date('2023-10-25'), returnDate: new Date('2023-11-01') },
+      { user: testUser._id, book: testBook2._id, borrowDate: new Date('2023-11-05'), returnDate: new Date('2023-11-12') },
+      { user: testUser._id, book: testBook._id, borrowDate: new Date('2023-11-15'), returnDate: new Date('2023-11-22') },
+    ];
+    await Loan.insertMany(loans);
+  });
+
+  it('should filter loans by userId', async () => {
+    const res = await request(app)
+      .get(`/api/loans?userId=${testUser._id}`)
+      .set('Authorization', token);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.length).toBe(3);
+    expect(res.body.data.every(loan => loan.user._id === testUser._id.toString())).toBe(true);
+  });
+
+  it('should filter loans by bookId', async () => {
+    const res = await request(app)
+      .get(`/api/loans?bookId=${testBook._id}`)
+      .set('Authorization', token);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.length).toBe(2);
+    expect(res.body.data.every(loan => loan.book._id === testBook._id.toString())).toBe(true);
+  });
+
+  it('should filter loans by borrow date range', async () => {
+    const res = await request(app)
+      .get('/api/loans?borrowedFrom=2023-11-01&borrowedTo=2023-11-15')
+      .set('Authorization', token);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.length).toBe(2);
+  });
+
+  it('should filter loans by due date range', async () => {
+    const res = await request(app)
+      .get('/api/loans?dueFrom=2023-11-10&dueTo=2023-11-25')
+      .set('Authorization', token);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.length).toBe(2);
+  });
+
+  it('should apply pagination correctly', async () => {
+    const res = await request(app)
+      .get('/api/loans?page=1&limit=2')
+      .set('Authorization', token);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.length).toBe(2);
+    expect(res.body.totalItems).toBe(3);
+    expect(res.body.totalPages).toBe(2);
+    expect(res.body.next.page).toBe(2);
+  });
 });
