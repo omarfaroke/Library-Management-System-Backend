@@ -46,6 +46,12 @@ const paginate = async (model, query = {}, page = 1, limit = 10, populate = []) 
         };
     }
 
+    // should return an empty array if page is out of range
+    if (startIndex >= results.totalItems) {
+        results.data = [];
+        return results;
+    }
+
     if (!populate || populate.length === 0) {
         results.data = await model.find(query)
             .skip(startIndex)
