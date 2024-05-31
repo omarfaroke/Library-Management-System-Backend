@@ -10,5 +10,7 @@ app.use(helmet());
 // Middleware
 app.use(express.json());
 
+// Routes
+require('./routes')(app);
 
 module.exports = app;
