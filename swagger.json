@@ -34,15 +34,98 @@
         "tags": [
           "Books"
         ],
-        "summary": "Get all books",
+        "summary": "Get all books (with pagination and filtering)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page number (default 1)",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Items per page (default 10)",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "description": "Search by title, author, year, or ISBN (case-insensitive)",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "description": "Filter by book title (case-insensitive)",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "author",
+            "description": "Filter by author name (case-insensitive)",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "description": "Filter by publication year",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "isbn",
+            "description": "Filter by ISBN",
+            "type": "string",
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A list of books",
+            "description": "A list of books with pagination",
             "schema": {
               "type": "object",
               "properties": {
                 "success": {
                   "type": "boolean"
+                },
+                "totalItems": {
+                  "type": "integer",
+                  "description": "Total number of books (matching the filter)"
+                },
+                "totalPages": {
+                  "type": "integer",
+                  "description": "Total number of pages"
+                },
+                "next": {
+                  "type": "object",
+                  "description": "Information for the next page (if available)",
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "previous": {
+                  "type": "object",
+                  "description": "Information for the previous page (if available)",
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    }
+                  }
                 },
                 "data": {
                   "type": "array",
@@ -233,19 +316,121 @@
         "tags": [
           "Loans"
         ],
-        "summary": "Get all loans (Requires authentication)",
+        "summary": "Get all loans (with pagination and filtering) (Requires authentication)",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page number (default 1)",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Items per page (default 10)",
+            "type": "integer",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "userId",
+            "description": "Filter by user ID",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "bookId",
+            "description": "Filter by book ID",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "borrowedFrom",
+            "description": "Filter by borrow date (from this date - YYYY-MM-DD)",
+            "type": "string",
+            "format": "date",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "borrowedTo",
+            "description": "Filter by borrow date (to this date - YYYY-MM-DD)",
+            "type": "string",
+            "format": "date",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "dueFrom",
+            "description": "Filter by due date (from this date - YYYY-MM-DD)",
+            "type": "string",
+            "format": "date",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "dueTo",
+            "description": "Filter by due date (to this date - YYYY-MM-DD)",
+            "type": "string",
+            "format": "date",
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A list of loans",
+            "description": "A list of loans with pagination",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Loan"
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "totalItems": {
+                  "type": "integer",
+                  "description": "Total number of loans (matching the filters)"
+                },
+                "totalPages": {
+                  "type": "integer",
+                  "description": "Total number of pages"
+                },
+                "next": {
+                  "type": "object",
+                  "description": "Information for the next page (if available)",
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "previous": {
+                  "type": "object",
+                  "description": "Information for the previous page (if available)",
+                  "properties": {
+                    "page": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Loan"
+                  }
+                }
               }
             }
           },
@@ -256,12 +441,53 @@
             "description": "Internal server error"
           }
         }
-      },
-      "post": {
+      }
+    },
+    "post": {
+      "tags": [
+        "Loans"
+      ],
+      "summary": "Create a new loan (Requires authentication)",
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "parameters": [
+        {
+          "in": "body",
+          "name": "body",
+          "description": "Loan object to be created",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/Loan"
+          }
+        }
+      ],
+      "responses": {
+        "201": {
+          "description": "Loan created successfully",
+          "schema": {
+            "$ref": "#/definitions/Loan"
+          }
+        },
+        "400": {
+          "description": "Bad request - Likely validation errors"
+        },
+        "401": {
+          "description": "Unauthorized - Missing or invalid token"
+        },
+        "500": {
+          "description": "Internal Server Error"
+        }
+      }
+    },
+    "/loans/{id}": {
+      "get": {
         "tags": [
           "Loans"
         ],
-        "summary": "Create a new loan (Requires authentication)",
+        "summary": "Get a loan by ID (Requires authentication)",
         "security": [
           {
             "bearerAuth": []
@@ -269,9 +495,53 @@
         ],
         "parameters": [
           {
+            "in": "path",
+            "name": "id",
+            "description": "Loan ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Loan object",
+            "schema": {
+              "$ref": "#/definitions/Loan"
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token"
+          },
+          "404": {
+            "description": "Loan not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Loans"
+        ],
+        "summary": "Update a loan by ID (Requires authentication)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Loan ID",
+            "required": true,
+            "type": "string"
+          },
+          {
             "in": "body",
             "name": "body",
-            "description": "Loan object to be created",
+            "description": "Updated loan object",
             "required": true,
             "schema": {
               "$ref": "#/definitions/Loan"
@@ -279,8 +549,8 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Loan created successfully",
+          "200": {
+            "description": "Loan updated successfully",
             "schema": {
               "$ref": "#/definitions/Loan"
             }
@@ -291,261 +561,19 @@
           "401": {
             "description": "Unauthorized - Missing or invalid token"
           },
+          "404": {
+            "description": "Loan not found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         }
       },
-      "/loans/{id}": {
-        "get": {
-          "tags": [
-            "Loans"
-          ],
-          "summary": "Get a loan by ID (Requires authentication)",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "description": "Loan ID",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Loan object",
-              "schema": {
-                "$ref": "#/definitions/Loan"
-              }
-            },
-            "401": {
-              "description": "Unauthorized - Missing or invalid token"
-            },
-            "404": {
-              "description": "Loan not found"
-            },
-            "500": {
-              "description": "Internal server error"
-            }
-          }
-        },
-        "put": {
-          "tags": [
-            "Loans"
-          ],
-          "summary": "Update a loan by ID (Requires authentication)",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "description": "Loan ID",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Updated loan object",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/Loan"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Loan updated successfully",
-              "schema": {
-                "$ref": "#/definitions/Loan"
-              }
-            },
-            "400": {
-              "description": "Bad request - Likely validation errors"
-            },
-            "401": {
-              "description": "Unauthorized - Missing or invalid token"
-            },
-            "404": {
-              "description": "Loan not found"
-            },
-            "500": {
-              "description": "Internal Server Error"
-            }
-          }
-        },
-        "delete": {
-          "tags": [
-            "Loans"
-          ],
-          "summary": "Delete a loan by ID (Requires authentication)",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "description": "Loan ID",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "204": {
-              "description": "Loan deleted successfully"
-            },
-            "401": {
-              "description": "Unauthorized - Missing or invalid token"
-            },
-            "404": {
-              "description": "Loan not found"
-            },
-            "500": {
-              "description": "Internal server error"
-            }
-          }
-        }
-      }
-    },
-    "/users/register": {
-      "post": {
+      "delete": {
         "tags": [
-          "Users"
+          "Loans"
         ],
-        "summary": "Register a new user",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "User object to be created",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UserRegister"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "User registered successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "token": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - Validation error or email already exists"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/users/login": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Login user",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "User credentials",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UserLogin"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Login successful",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "token": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Invalid credentials"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/users/profile": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Get current user's profile (Requires authentication)",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User profile",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "success": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "data": {
-                  "$ref": "#/definitions/User"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Missing or invalid token"
-          },
-          "404": {
-            "description": "User not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Update user's profile (Requires authentication)",
+        "summary": "Delete a loan by ID (Requires authentication)",
         "security": [
           {
             "bearerAuth": []
@@ -553,34 +581,191 @@
         ],
         "parameters": [
           {
-            "in": "body",
-            "name": "body",
-            "description": "Updated user profile data",
+            "in": "path",
+            "name": "id",
+            "description": "Loan ID",
             "required": true,
-            "schema": {
-              "$ref": "#/definitions/UserProfileUpdate"
-            }
+            "type": "string"
           }
         ],
         "responses": {
-          "200": {
-            "description": "Profile updated successfully",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          },
-          "400": {
-            "description": "Bad Request - Validation error"
+          "204": {
+            "description": "Loan deleted successfully"
           },
           "401": {
             "description": "Unauthorized - Missing or invalid token"
           },
           "404": {
-            "description": "User not found"
+            "description": "Loan not found"
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error"
           }
+        }
+      }
+    }
+  },
+  "/users/register": {
+    "post": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Register a new user",
+      "parameters": [
+        {
+          "in": "body",
+          "name": "body",
+          "description": "User object to be created",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/UserRegister"
+          }
+        }
+      ],
+      "responses": {
+        "201": {
+          "description": "User registered successfully",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean",
+                "example": true
+              },
+              "token": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad request - Validation error or email already exists"
+        },
+        "500": {
+          "description": "Internal server error"
+        }
+      }
+    }
+  },
+  "/users/login": {
+    "post": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Login user",
+      "parameters": [
+        {
+          "in": "body",
+          "name": "body",
+          "description": "User credentials",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/UserLogin"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Login successful",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean",
+                "example": true
+              },
+              "token": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "Invalid credentials"
+        },
+        "500": {
+          "description": "Internal server error"
+        }
+      }
+    }
+  },
+  "/users/profile": {
+    "get": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Get current user's profile (Requires authentication)",
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "User profile",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "type": "boolean",
+                "example": true
+              },
+              "data": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized - Missing or invalid token"
+        },
+        "404": {
+          "description": "User not found"
+        },
+        "500": {
+          "description": "Internal server error"
+        }
+      }
+    },
+    "put": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Update user's profile (Requires authentication)",
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ],
+      "parameters": [
+        {
+          "in": "body",
+          "name": "body",
+          "description": "Updated user profile data",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/UserProfileUpdate"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Profile updated successfully",
+          "schema": {
+            "$ref": "#/definitions/User"
+          }
+        },
+        "400": {
+          "description": "Bad Request - Validation error"
+        },
+        "401": {
+          "description": "Unauthorized - Missing or invalid token"
+        },
+        "404": {
+          "description": "User not found"
+        },
+        "500": {
+          "description": "Internal Server Error"
         }
       }
     }
