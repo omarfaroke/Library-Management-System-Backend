@@ -2,12 +2,45 @@ const Book = require('../models/book.model');
 const { NotFoundError, ValidationError } = require('../utils/errorHandler');
 const { bookSchema } = require('../utils/validationSchemas');
 const validationHelper = require('../utils/validationHelper');
+const paginate = require('../utils/paginationHelper');
 
 // Get all books
 exports.getAllBooks = async (req, res, next) => {
   try {
-    const books = await Book.find();
-    res.status(200).json({ success: true, data: books });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    // Create a filter object based on query parameters
+    const filter = {};
+
+    // Filter by title, author, or ISBN using a single 'search' parameter
+    if (req.query.search) {
+      const searchRegex = new RegExp(req.query.search, 'i'); // Case-insensitive search
+      filter.$or = [
+        { title: searchRegex },
+        { author: searchRegex },
+        { isbn: searchRegex }
+      ];
+    } else {
+      // Individual filters
+      if (req.query.title) {
+        filter.title = { $regex: req.query.title, $options: 'i' };
+      }
+      if (req.query.author) {
+        filter.author = { $regex: req.query.author, $options: 'i' };
+      }
+      if (req.query.isbn) {
+        filter.isbn = { $regex: req.query.isbn, $options: 'i' };
+      }
+    }
+
+    // Use the paginate helper function
+    const results = await paginate(Book, filter, page, limit);
+
+    res.status(200).json({
+      success: true,
+      ...results
+    });
   } catch (error) {
     next(error);
   }
