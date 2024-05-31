@@ -1,0 +1,719 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Library System Management API",
+    "description": "A simple API for managing books and loans in a library system"
+  },
+  "host": "localhost:5000",
+  "basePath": "/api",
+  "tags": [
+    {
+      "name": "Books",
+      "description": "Operations related to books"
+    },
+    {
+      "name": "Loans",
+      "description": "Operations related to loans"
+    },
+    {
+      "name": "Users",
+      "description": "Operations related to users and authentication"
+    }
+  ],
+  "securityDefinitions": {
+    "bearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "paths": {
+    "/books": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Get all books",
+        "responses": {
+          "200": {
+            "description": "A list of books",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Book"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Create a new book (Requires authentication)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Book object to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Book"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Book created successfully",
+            "schema": {
+              "$ref": "#/definitions/Book"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error or duplicate ISBN",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Validation Error: 'title' must be a string"
+                },
+                "details": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/books/{id}": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Get a book by ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Book ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book object",
+            "schema": {
+              "$ref": "#/definitions/Book"
+            }
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Update a book by ID (Requires authentication)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Book ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Updated book object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Book"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book updated successfully",
+            "schema": {
+              "$ref": "#/definitions/Book"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error or duplicate ISBN"
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Books"
+        ],
+        "summary": "Delete a book by ID (Requires authentication)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Book ID",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Book deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token"
+          },
+          "404": {
+            "description": "Book not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/loans": {
+      "get": {
+        "tags": [
+          "Loans"
+        ],
+        "summary": "Get all loans (Requires authentication)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of loans",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Loan"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Loans"
+        ],
+        "summary": "Create a new loan (Requires authentication)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Loan object to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Loan"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Loan created successfully",
+            "schema": {
+              "$ref": "#/definitions/Loan"
+            }
+          },
+          "400": {
+            "description": "Bad request - Likely validation errors"
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "/loans/{id}": {
+        "get": {
+          "tags": [
+            "Loans"
+          ],
+          "summary": "Get a loan by ID (Requires authentication)",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "description": "Loan ID",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Loan object",
+              "schema": {
+                "$ref": "#/definitions/Loan"
+              }
+            },
+            "401": {
+              "description": "Unauthorized - Missing or invalid token"
+            },
+            "404": {
+              "description": "Loan not found"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Loans"
+          ],
+          "summary": "Update a loan by ID (Requires authentication)",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "description": "Loan ID",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Updated loan object",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Loan"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Loan updated successfully",
+              "schema": {
+                "$ref": "#/definitions/Loan"
+              }
+            },
+            "400": {
+              "description": "Bad request - Likely validation errors"
+            },
+            "401": {
+              "description": "Unauthorized - Missing or invalid token"
+            },
+            "404": {
+              "description": "Loan not found"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Loans"
+          ],
+          "summary": "Delete a loan by ID (Requires authentication)",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "description": "Loan ID",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Loan deleted successfully"
+            },
+            "401": {
+              "description": "Unauthorized - Missing or invalid token"
+            },
+            "404": {
+              "description": "Loan not found"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          }
+        }
+      }
+    },
+    "/users/register": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Register a new user",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User object to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserRegister"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Validation error or email already exists"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Login user",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User credentials",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserLogin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/users/profile": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get current user's profile (Requires authentication)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "data": {
+                  "$ref": "#/definitions/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update user's profile (Requires authentication)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Updated user profile data",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserProfileUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation error"
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Book": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "description": "Book ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the book"
+        },
+        "author": {
+          "type": "string",
+          "description": "Author of the book"
+        },
+        "year": {
+          "type": "integer",
+          "description": "Publication year"
+        },
+        "isbn": {
+          "type": "string",
+          "description": "ISBN of the book",
+          "example": "123-4-56789-123-4"
+        }
+      }
+    },
+    "Loan": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "description": "Loan ID"
+        },
+        "user": {
+          "type": "string",
+          "description": "User ID who borrowed the book"
+        },
+        "book": {
+          "type": "string",
+          "description": "Book ID that was borrowed"
+        },
+        "borrowDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date when the book was borrowed"
+        },
+        "returnDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date when the book is due"
+        }
+      }
+    },
+    "UserRegister": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "John Doe"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "example": "john.doe@example.com"
+        },
+        "password": {
+          "type": "string",
+          "format": "password",
+          "example": "password123"
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "password"
+      ]
+    },
+    "UserLogin": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "example": "john.doe@example.com"
+        },
+        "password": {
+          "type": "string",
+          "format": "password",
+          "example": "password123"
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ]
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "description": "User ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "User's full name"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address"
+        }
+      }
+    },
+    "UserProfileUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "New name for the user (optional)"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "New email address for the user (optional)"
+        }
+      },
+      "minProperties": 1,
+      "description": "At least one property is required for update."
+    }
+  }
+}
