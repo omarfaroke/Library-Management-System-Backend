@@ -6,6 +6,8 @@
     "scripts": {
         "start": "node src/index.js",
         "dev": "nodemon src/index.js",
+        "test": "jest --verbose --coverage",
+        "test:debug": "jest --verbose --coverage --runInBand",
         "seed": "node src/data/seed.js"
     },
     "author": "",
@@ -22,6 +24,9 @@
         "swagger-ui-express": "^5.0.0"
     },
     "devDependencies": {
-        "nodemon": "^3.1.2"
+        "jest": "^29.7.0",
+        "mongodb-memory-server": "^9.2.0",
+        "nodemon": "^3.1.2",
+        "supertest": "^7.0.0"
     }
 }
