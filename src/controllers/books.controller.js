@@ -1,6 +1,7 @@
 const Book = require('../models/book.model');
 const { NotFoundError, ValidationError } = require('../utils/errorHandler');
 const { bookSchema } = require('../utils/validationSchemas');
+const validationHelper = require('../utils/validationHelper');
 
 // Get all books
 exports.getAllBooks = async (req, res, next) => {
@@ -48,8 +49,12 @@ exports.createBook = async (req, res, next) => {
 // Update a book by ID
 exports.updateBook = async (req, res, next) => {
   try {
-    // Validate request body against the schema
-    const { error, value } = bookSchema.validate(req.body);
+
+    // Make all fields optional except the ones that are present in the request body
+    const modifiedSchema = validationHelper.makeSchemaFieldsOptional(bookSchema, req.body);
+
+    // Validate request body against the schema (only validate fields that are present in the request body)
+    const { error, value } = modifiedSchema.validate(req.body);
     if (error) {
       return next(new ValidationError('Validation Error', error.details[0].message));
     }
