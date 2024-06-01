@@ -1,5 +1,6 @@
 const Loan = require('../models/loan.model');
-const { NotFoundError } = require('../utils/errorHandler');
+const { NotFoundError, ValidationError } = require('../utils/errorHandler');
+const { loanSchema } = require('../utils/validationSchemas');
 const paginate = require('../utils/paginationHelper');
 
 // Get all loans
@@ -72,7 +73,15 @@ exports.getLoanById = async (req, res, next) => {
 // Create a new loan
 exports.createLoan = async (req, res, next) => {
   try {
-    const newLoan = await Loan.create(req.body);
+    // Validate request body against the schema
+    const { error, value } = loanSchema.validate(req.body);
+
+    if (error) {
+      return next(new ValidationError('Validation Error', error.details[0].message));
+    }
+
+    const newLoan = await Loan.create(value);
+
     res.status(201).json({ success: true, data: newLoan });
   } catch (error) {
     next(error);

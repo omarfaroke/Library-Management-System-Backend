@@ -11,6 +11,12 @@ const bookSchema = Joi.object({
   }),
 });
 
+const loanSchema = Joi.object({
+  book: Joi.string().required(),
+  user: Joi.string().required(),
+  returnDate: Joi.date().required(),
+});
+
 const userRegisterSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(),
@@ -29,6 +35,7 @@ const userProfileUpdateSchema = Joi.object({
 
 module.exports = {
   bookSchema,
+  loanSchema,
   userRegisterSchema,
   userLoginSchema,
   userProfileUpdateSchema,
